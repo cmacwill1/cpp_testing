@@ -19,7 +19,7 @@ endif()
 
 
 # Add executable
-add_executable(test test.cpp)
+add_executable(test src/test.cpp)
 
 # Optional: include directories (if you have any)
 # target_include_directories(test PRIVATE include)
