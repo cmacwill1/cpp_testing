@@ -1,0 +1,1 @@
+/nix/store/sqlnjj8c3n3si3sjnadhdbcwgrk97g2w-clang-wrapper-21.1.2/bin/clang++ -Xlinker --dependency-file=CMakeFiles/test.dir/link.d CMakeFiles/test.dir/test.cpp.o -o bin/test
