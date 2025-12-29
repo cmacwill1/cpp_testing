@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <unistd.h>
 
 using namespace std;
 
@@ -117,6 +118,7 @@ vector<int> root_expression_finder(vector<Token> token_vector) {
         }
         if (token_vector[i].kind == '(') {
             parenthesis_counter = 0;
+            operation_counter = 0;
         } else if (parenthesis_counter != ')') {
             parenthesis_counter++;
         }
@@ -134,7 +136,7 @@ vector<int> root_expression_finder(vector<Token> token_vector) {
 
 
 int main() {
-    cout << "enter expression:\n>";
+    cout << "enter expression:\nMATH REPL>> ";
     string user_input;
     getline(cin, user_input);
     vector<Token> token_vector = get_token_vector(user_input);
