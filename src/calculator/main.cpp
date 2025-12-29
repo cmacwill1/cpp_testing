@@ -34,7 +34,7 @@ vector<Token> get_token_vector(string str) {
     is_number.push_back(0); // add padding to trigger getting final number
     is_operator.push_back(0); // add padding to trigger getting final number
 
-    vector<Token> token_str;
+    vector<Token> token_vector;
     int double_length = 0;
     for (int i=0; i<is_number.size(); i++) {
         if (is_number[i]) {
@@ -42,15 +42,15 @@ vector<Token> get_token_vector(string str) {
         } else {
             if (double_length != 0) {
                 double double_val = stod(str.substr(i - double_length, double_length));
-                token_str.push_back(Token('#', double_val));
+                token_vector.push_back(Token('#', double_val));
             }
             double_length = 0;
             if (is_operator[i]) {
-                token_str.push_back(Token(str[i]));
+                token_vector.push_back(Token(str[i]));
             }
         }
     }
-    return token_str;
+    return token_vector;
 }
 
 vector<Token> operation_evaluator(vector<Token> token_vector, int solve_index) {
@@ -134,14 +134,7 @@ vector<int> root_expression_finder(vector<Token> token_vector) {
     return vector<int> {0,wtf,0};
 }
 
-
-int main() {
-    cout << "enter expression:\nMATH REPL>> ";
-    string user_input;
-    getline(cin, user_input);
-    vector<Token> token_vector = get_token_vector(user_input);
-
-
+double calculator(vector<Token> token_vector) {
     int number_of_numbers = 0;
     while (number_of_numbers != 1) {
         number_of_numbers = 0;
@@ -166,15 +159,27 @@ int main() {
 
     for (Token t:token_vector) {
         if (t.kind == '#') {
-            cout << t.value << '\n';
+            return t.value;
         }
     }
-    /*
-    vector<int> solve_location = root_expression_finder(token_vector);
-    if (solve_location[0] != 0) {
-        for (int i=solve_location[1]; i < solve_location[1] + solve_location[0]; i++) {
 
+    throw runtime_error("No solution?");
+}
+
+
+int main() {
+    cout << "Welcome to Calculator REPL version 0.9\nEnter expression with +,-,*,/ operators\nParenthesis (,) also suuported\nStrictly negative numbers currently not supported.\nEnter 'quit' to quit.\n" << '\n';
+    bool running = 1;
+    while(running) {
+        cout << "Calculator REPL>> ";
+        string user_input;
+        getline(cin, user_input);
+        if (user_input == "quit") {
+            running = 0;
+            break;
         }
+        vector<Token> token_vector = get_token_vector(user_input);
+        double returned_value = calculator(token_vector);
+        cout << returned_value << '\n';
     }
-    */
 }
