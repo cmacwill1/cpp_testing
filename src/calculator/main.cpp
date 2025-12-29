@@ -52,7 +52,7 @@ vector<Token> get_token_vector(string str) {
     return token_str;
 }
 
-double evaluate_token_map(vector<Token> token_vector, int solve_index) {
+vector<Token> operation_evaluator(vector<Token> token_vector, int solve_index) {
     int first_number = 1;
     int second_number = 1;
     bool is_valid = 1;
@@ -66,39 +66,113 @@ double evaluate_token_map(vector<Token> token_vector, int solve_index) {
         }
     }
 
+    double new_value = 0;
     switch (token_vector[solve_index].kind) {
         case '+': {
-            return token_vector[solve_index - first_number].value + token_vector[solve_index + second_number].value;
+            new_value = token_vector[solve_index - first_number].value + token_vector[solve_index + second_number].value;
+            break;
         }
         case '-': {
-            return token_vector[solve_index - first_number].value - token_vector[solve_index + second_number].value;
+            new_value = token_vector[solve_index - first_number].value - token_vector[solve_index + second_number].value;
+            break;
         }
         case '*': {
-            return token_vector[solve_index - first_number].value * token_vector[solve_index + second_number].value;
+            new_value = token_vector[solve_index - first_number].value * token_vector[solve_index + second_number].value;
+            break;
         }
         case '/': {
-            return token_vector[solve_index - first_number].value / token_vector[solve_index + second_number].value;
+            new_value = token_vector[solve_index - first_number].value / token_vector[solve_index + second_number].value;
+            break;
         }
         default: {
             throw runtime_error("Invalid operator");
         }
     }
+    for (int i=solve_index - first_number; i <= solve_index + second_number; i++) {
+        token_vector[i].kind = 'n';
+        token_vector[i].value = 0;
+    }
+    token_vector[solve_index].kind = '#';
+    token_vector[solve_index].value = new_value;
+    return token_vector;
+}
+
+vector<Token> evaluate_expression(vector<Token> token_vector, int start_index, int end_index) {
+    for (char ch:{'/','*','-','+'}) {
+        for (int i=start_index; i <= end_index; i++) {
+            if (token_vector[i].kind == ch) {
+                token_vector = operation_evaluator(token_vector, i);
+            }
+        }
+    }
+    return token_vector;
+}
+
+vector<int> root_expression_finder(vector<Token> token_vector) {
+    int parenthesis_counter = 0;
+    int operation_counter = 0;
+    for (int i = 0; i<token_vector.size(); i++) {
+        if (token_vector[i].kind == '+' || token_vector[i].kind == '-' || token_vector[i].kind == '*' || token_vector[i].kind == '/') {
+            operation_counter++;
+        }
+        if (token_vector[i].kind == '(') {
+            parenthesis_counter = 0;
+        } else if (parenthesis_counter != ')') {
+            parenthesis_counter++;
+        }
+        if (token_vector[i].kind == ')') {
+            if (operation_counter == 0) {
+                return vector<int> {i - parenthesis_counter, i, 1};
+            } else {
+                return vector<int> {i - parenthesis_counter, i, 0};
+            }
+        }
+    }
+    int wtf = token_vector.size(); // what the hell man
+    return vector<int> {0,wtf,0};
 }
 
 
 int main() {
-    cout << "enter expression:\n";
+    cout << "enter expression:\n>";
     string user_input;
     getline(cin, user_input);
     vector<Token> token_vector = get_token_vector(user_input);
 
 
+    int number_of_numbers = 0;
+    while (number_of_numbers != 1) {
+        number_of_numbers = 0;
+        vector<int> checker = root_expression_finder(token_vector);
+
+        token_vector = evaluate_expression(token_vector, checker[0], checker[1]);
+
+        if (checker[2] == 1) {
+            token_vector[checker[0]].kind = 'n';
+            token_vector[checker[0]].value = 0;
+            token_vector[checker[1]].kind = 'n';
+            token_vector[checker[1]].value = 0;
+        }
+
+        for (Token t:token_vector) {
+            if (t.kind == '#') {
+                number_of_numbers++;
+            }
+        }
+
+    }
 
     for (Token t:token_vector) {
-        cout << t.kind << ' ' << t.value << '\n';
+        if (t.kind == '#') {
+            cout << t.value << '\n';
+        }
     }
-    cout << '\n';
+    /*
+    vector<int> solve_location = root_expression_finder(token_vector);
+    if (solve_location[0] != 0) {
+        for (int i=solve_location[1]; i < solve_location[1] + solve_location[0]; i++) {
 
-    double value = evaluate_token_map(token_vector, 1);
-    cout << value << '\n';
+        }
+    }
+    */
 }
