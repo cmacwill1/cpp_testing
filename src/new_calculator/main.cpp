@@ -1,4 +1,7 @@
+#include <cmath>
+#include <exception>
 #include <iostream>
+#include <random>
 #include <string>
 #include <stdexcept>
 
@@ -26,6 +29,24 @@ private:
 };
 
 
+class Dice_engine {
+public:
+    int roll(int nrolls, int dice);
+private:
+    default_random_engine generator;
+};
+
+int Dice_engine::roll(int nrolls, int dice)
+{
+    uniform_int_distribution distribution(1,dice);
+    int total = 0;
+    for (int i = 0; i<nrolls; i++) {
+        total += distribution(generator);
+    }
+    return total;
+}
+
+
 void Token_stream::putback(Token t)
 {
     buffer = t;
@@ -51,6 +72,7 @@ Token Token_stream::get()
         case'-':
         case'*':
         case'/':
+        case'd':
         {
             return Token{ch};
         }
@@ -76,7 +98,18 @@ Token Token_stream::get()
     }
 }
 
+
+
+
+
+
+
+
+
+
 Token_stream ts;
+Dice_engine de;
+
 double expression();
 
 double primary()
@@ -115,6 +148,14 @@ double term()
     Token t = ts.get();
     while (true) {
         switch (t.kind) {
+            case 'd':
+            {
+                int d_num1 = static_cast<int>(round(left));
+                int d_num2 = static_cast<int>(round(primary()));
+                left = static_cast<double>(de.roll(d_num1,d_num2));
+                t = ts.get();
+                break;
+            }
             case '*':
             {
                 left *= primary();
@@ -167,15 +208,25 @@ int main()
 {
     double val = 0;
     while (cin) {
-        Token t = ts.get();
-        if (t.kind == 'q') //quit
-            break;
-        if (t.kind == ';') {
-            cout << val << '\n';
+        try {
+            Token t = ts.get();
+            if (t.kind == 'q') //quit
+                break;
+            if (t.kind == ';') {
+                cout << val << '\n';
+            }
+            else {
+                ts.putback(t);
+            }
+            val = expression();
         }
-        else {
-            ts.putback(t);
+        catch (exception& e) {
+            cerr << "Exception: " << e.what() << '\n';
+            return 1;
         }
-        val = expression();
+        catch (...) {
+            cerr << "Unknown Exception: " << '\n';
+            return 2;
+        }
     }
 }
